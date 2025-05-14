@@ -353,7 +353,7 @@ def main():
                 else:
                     # No data in table, use a default starting date
                     min_date = datetime.datetime.strptime(
-                        "2000-01-01", "%Y-%m-%d"
+                        "1900-01-01", "%Y-%m-%d"
                     ).date()
                     print(
                         f"Table {args.table_name} exists but contains no date data, using default min-date: {min_date}"

@@ -30,6 +30,49 @@ To run DuckDB with remote access to the data lake:
 ./run_duckdb_ui.sh
 ```
 
+## Methodology
+
+The system combines three primary data sources to produce zipcode-level daily weather metrics:
+
+1. **NOAA Station Readings** (`ghcn_daily_raw`): Raw weather observations from NOAA's Global Historical Climatology Network, including precipitation, temperature, snow measurements and other metrics.
+
+2. **NOAA Station Location Data** (`ghcnd_stations`): Geographic coordinates and metadata for each NOAA weather station.
+
+3. **ZIP Code Gazette** (`zipcodes`): Geographic information about ZIP codes, including centroid coordinates.
+
+### Data Processing Pipeline
+
+The processing occurs in two main stages:
+
+#### Stage 1: Linking ZIP Codes to Weather Stations
+
+The `compute_zipcode_stations.py` script creates a relationship table (`zipcode_stations`) that maps each ZIP code to its nearest weather stations:
+
+1. For each ZIP code, the script calculates the distance to all weather stations using the Haversine formula (which accounts for Earth's curvature).
+2. Performance optimizations include:
+   - Pre-filtering stations based on latitude/longitude differences (≤ 5 degrees)
+   - Setting a maximum distance threshold (200 miles)
+   - Processing ZIP codes in batches to manage memory usage
+3. The script ranks stations by proximity to each ZIP code and stores the N closest stations.
+4. The resulting table includes distance information and geographic coordinates of both the ZIP code and the station.
+
+#### Stage 2: Computing Daily Weather Metrics by ZIP Code
+
+The `compute_daily_metric.py` script generates daily weather metrics for each ZIP code (`zipcode_daily_metrics`):
+
+1. The script filters the `zipcode_stations` table to include only stations within a specified distance (default: 20 miles).
+2. For each date in the specified range:
+   - Weather observations from `ghcn_daily_raw` are joined with filtered stations.
+   - Quality-flagged data is excluded.
+   - For each weather element (PRCP, SNOW, SNWD, TMAX, TMIN), the script calculates:
+     - Average value across all stations for each ZIP code
+     - Count of observations
+     - Standard deviation of observations
+3. The aggregated metrics are pivoted into a wide format with columns for each weather element.
+4. Results are stored in the `zipcode_daily_metrics` table with year, month, and day components extracted for easier querying.
+
+This methodology enables the creation of a comprehensive dataset that provides daily weather metrics for any ZIP code with nearby weather stations, effectively interpolating point-based weather observations to area-based geographic regions.
+
 ## Database Schema: `weather.duckdb`
 
 The database contains the following tables:
