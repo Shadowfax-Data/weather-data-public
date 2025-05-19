@@ -3,6 +3,7 @@
 ![Workflow Status](https://github.com/Shadowfax-Data/weather-data-public/actions/workflows/download_ncei.yml/badge.svg)
 
 [Pipeline is running twice daily to ingest the latest weather data](https://github.com/Shadowfax-Data/weather-data-public/actions/workflows/download_ncei.yml)
+[Available for instant access on Snowflake Marketplace](https://app.snowflake.com/marketplace/listing/GZTYZI0X30/shadowfax-ai-us-historical-weather-data-by-zip-code-built-by-ai)
 
 This repository contains tools and data for processing weather information from NOAA's Global Historical Climatology Network (GHCN).
 
