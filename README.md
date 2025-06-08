@@ -1,8 +1,10 @@
 # Weather Database Documentation
 
-![Workflow Status](https://github.com/Shadowfax-Data/weather-data-public/actions/workflows/download_ncei.yml/badge.svg)
+![Workflow Status](https://github.com/Shadowfax-Data/weather-data-public/actions/workflows/download_daily_metrics.yml/badge.svg)
 
-[Pipeline is running twice daily to ingest the latest weather data](https://github.com/Shadowfax-Data/weather-data-public/actions/workflows/download_ncei.yml)
+[Pipeline is running twice daily to ingest the latest weather data](https://github.com/Shadowfax-Data/weather-data-public/actions/workflows/download_daily_metrics.yml)
+
+[Storm events pipeline is running weekly to ingest the latest storm data](https://github.com/Shadowfax-Data/weather-data-public/actions/workflows/download_storm_events.yml)
 
 [Available for instant access on Snowflake Marketplace](https://app.snowflake.com/marketplace/listing/GZTYZI0X30/shadowfax-ai-us-historical-weather-data-by-zip-code-built-by-ai)
 
@@ -155,4 +157,60 @@ m_flag      VARCHAR     # Measurement flag
 q_flag      VARCHAR     # Quality flag
 s_flag      VARCHAR     # Source flag
 obs_time    VARCHAR     # Observation time
+```
+
+### 7. storm_events
+Storm events data from NOAA's Storm Data publication, containing details about significant weather events that caused fatalities, injuries, property damage, and/or disruption to commerce.
+```
+BEGIN_YEARMONTH      BIGINT      # Year and month the event began (YYYYMM format)
+BEGIN_DAY            BIGINT      # Day of the month the event began
+BEGIN_TIME           BIGINT      # Time of day the event began (HHMM format)
+END_YEARMONTH        BIGINT      # Year and month the event ended (YYYYMM format)
+END_DAY              BIGINT      # Day of the month the event ended
+END_TIME             BIGINT      # Time of day the event ended (HHMM format)
+EPISODE_ID           VARCHAR     # NWS-assigned ID for storm episode (may contain multiple events)
+EVENT_ID             BIGINT      # NWS-assigned unique ID for individual storm event (primary key)
+STATE                VARCHAR     # State name where event occurred (all caps)
+STATE_FIPS           BIGINT      # State Federal Information Processing Standard number
+YEAR                 BIGINT      # Four digit year of the event
+MONTH_NAME           VARCHAR     # Full month name (January, February, etc.)
+EVENT_TYPE           VARCHAR     # Type of weather event (Hail, Tornado, Thunderstorm Wind, etc.)
+CZ_TYPE              VARCHAR     # County (C), Zone (Z), or Marine (M) designation
+CZ_FIPS              BIGINT      # County FIPS number or NWS Forecast Zone number
+CZ_NAME              VARCHAR     # County/Parish, Zone or Marine name
+WFO                  VARCHAR     # National Weather Service Forecast Office identifier
+BEGIN_DATE_TIME      TIMESTAMP   # Event start date and time (MM/DD/YYYY HH:MM:SS)
+CZ_TIMEZONE          VARCHAR     # Time zone (EST-5, CST-6, MST-7, etc.)
+END_DATE_TIME        TIMESTAMP   # Event end date and time (MM/DD/YYYY HH:MM:SS)
+INJURIES_DIRECT      BIGINT      # Number of direct injuries caused by the event
+INJURIES_INDIRECT    BIGINT      # Number of indirect injuries caused by the event
+DEATHS_DIRECT        BIGINT      # Number of direct deaths caused by the event
+DEATHS_INDIRECT      BIGINT      # Number of indirect deaths caused by the event
+DAMAGE_PROPERTY      DOUBLE      # Estimated property damage in dollars
+DAMAGE_CROPS         DOUBLE      # Estimated crop damage in dollars
+SOURCE               VARCHAR     # Source reporting the event (Public, Law Enforcement, etc.)
+MAGNITUDE            BIGINT      # Measured extent for wind speeds (knots) or hail size (inches)
+MAGNITUDE_TYPE       VARCHAR     # Type of magnitude measurement (EG, ES, MS, MG)
+FLOOD_CAUSE          VARCHAR     # Reported or estimated cause of flood events
+CATEGORY             VARCHAR     # Event category (rarely populated)
+TOR_F_SCALE          VARCHAR     # Enhanced Fujita Scale for tornadoes (EF0-EF5)
+TOR_LENGTH           DOUBLE      # Length of tornado path on ground (miles)
+TOR_WIDTH            BIGINT      # Width of tornado path on ground (yards)
+TOR_OTHER_WFO        VARCHAR     # Continuation WFO if tornado crossed forecast areas
+TOR_OTHER_CZ_STATE   VARCHAR     # State of continuing tornado segment
+TOR_OTHER_CZ_FIPS    VARCHAR     # FIPS of county entered by continuing tornado
+TOR_OTHER_CZ_NAME    VARCHAR     # Name of county entered by continuing tornado
+BEGIN_RANGE          BIGINT      # Distance to begin location (miles)
+BEGIN_AZIMUTH        VARCHAR     # 16-point compass direction to begin location
+BEGIN_LOCATION       VARCHAR     # Reference location name for begin point
+END_RANGE            BIGINT      # Distance to end location (miles)
+END_AZIMUTH          VARCHAR     # 16-point compass direction to end location
+END_LOCATION         VARCHAR     # Reference location name for end point
+BEGIN_LAT            DOUBLE      # Latitude of event begin point (decimal degrees)
+BEGIN_LON            DOUBLE      # Longitude of event begin point (decimal degrees)
+END_LAT              DOUBLE      # Latitude of event end point (decimal degrees)
+END_LON              DOUBLE      # Longitude of event end point (decimal degrees)
+EPISODE_NARRATIVE    VARCHAR     # General description of the storm episode
+EVENT_NARRATIVE      VARCHAR     # Detailed description of the individual event
+DATA_SOURCE          VARCHAR     # Source of the storm data
 ```

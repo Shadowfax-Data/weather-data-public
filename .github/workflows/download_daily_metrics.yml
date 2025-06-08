@@ -1,4 +1,4 @@
-name: Download NCEI Data
+name: Download Daily Metrics Data
 
 on:
   schedule:
@@ -16,37 +16,37 @@ jobs:
       PREFIX: ${{ vars.PREFIX }}
       ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-      
+
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      
+
       - name: Install dependencies
         run: |
           poetry config virtualenvs.create false
           poetry install --no-interaction
-        
+
       - name: Download base database
         run: |
           wget -q -O weather.duckdb https://datalake.shadowfaxdata.com/weather/weather_base.duckdb
-      
+
       - name: Download data since last month
         run: |
           # Calculate the beginning of last month
           python -c "import datetime; now = datetime.datetime.now(); last_month = now.replace(day=1) - datetime.timedelta(days=1); print(last_month.year)" > last_month_year.txt
           # Download all data since the beginning of last month
           python ./download_ncei.py --since-year $(cat last_month_year.txt)
-      
+
       - name: Compute daily metrics since last month
         run: |
           # Compute daily metrics from the beginning of last month
@@ -55,7 +55,15 @@ jobs:
 
       - name: Export to parquet
         run: |
-          python ./export_to_parquet.py --access-key $ACCESS_KEY --secret-key $SECRET_KEY --endpoint-url $ENDPOINT_URL --bucket $BUCKET --prefix $PREFIX --partition-col "year, month" --verbose
+          python ./export_to_parquet.py \
+            --access-key $ACCESS_KEY \
+            --secret-key $SECRET_KEY \
+            --endpoint-url $ENDPOINT_URL \
+            --bucket $BUCKET \
+            --prefix $PREFIX \
+            --partition-col "year, month" \
+            --table-name "zipcode_daily_metrics" \
+            --verbose
 
       - name: List files in bucket
         run: |
@@ -64,5 +72,5 @@ jobs:
                 --host="$ENDPOINT_URL" \
                 --host-bucket="%(bucket)s.$ENDPOINT_URL" \
                 --recursive \
-                ls s3://$BUCKET/$PREFIX
+                ls s3://$BUCKET/$PREFIX/zipcode_daily_metrics
           echo "Files are accessible at https://datalake.shadowfaxdata.com"
